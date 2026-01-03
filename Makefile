@@ -1,10 +1,11 @@
 all: run
 
-setup:
+venv:
 	python3 -m venv venv
 	./venv/bin/pip install -e .
+	@echo "Setup complete!"
 
-run: setup
+run: venv
 	./venv/bin/search-engine-cli
 
 clean:

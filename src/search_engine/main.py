@@ -113,7 +113,7 @@ class SearchEngine:
                 preview += "..."
 
             print(dedent(f"""
-            {rank}. {doc_id}
+            \x1B[32m{rank}. {doc_id}\x1B[0m
             Score: {score:.4f}
             Preview: {preview}
             Categories: {', '.join(reuters.categories(doc_id))}
