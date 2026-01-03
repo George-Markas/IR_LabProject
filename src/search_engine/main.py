@@ -5,12 +5,12 @@ from collections import defaultdict
 from textwrap import dedent
 import numpy
 
-from src.search_engine.config import DATA_DIR
-from src.search_engine.text_processor import TextProcessor
-from src.search_engine.inverted_index import InvertedIndex
-from src.search_engine.boolean_retrieval import BooleanRetrieval
-from src.search_engine.vector_space_model import VectorSpaceModel
-from src.search_engine.okapi_bm25 import OkapiBM25
+from search_engine.config import DATA_DIR
+from search_engine.text_processor import TextProcessor
+from search_engine.inverted_index import InvertedIndex
+from search_engine.boolean_retrieval import BooleanRetrieval
+from search_engine.vector_space_model import VectorSpaceModel
+from search_engine.okapi_bm25 import OkapiBM25
 
 # Download NLTK data
 nltk.data.path.append(DATA_DIR)

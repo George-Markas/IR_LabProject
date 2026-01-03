@@ -1,4 +1,4 @@
-from src.search_engine.inverted_index import InvertedIndex
+from search_engine.inverted_index import InvertedIndex
 from typing import List, Tuple
 import math
 
