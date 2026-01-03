@@ -1,4 +1,4 @@
-from inverted_index import InvertedIndex
+from src.search_engine.inverted_index import InvertedIndex
 from typing import List
 
 class BooleanRetrieval:
