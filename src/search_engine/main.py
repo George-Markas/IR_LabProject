@@ -3,9 +3,9 @@ from nltk.corpus import reuters
 from typing import List, Tuple, Set, Dict
 from collections import defaultdict
 from textwrap import dedent
-from pathlib import Path
 import numpy
 
+from config import DATA_DIR
 from text_processor import TextProcessor
 from inverted_index import InvertedIndex
 from boolean_retrieval import BooleanRetrieval
@@ -13,16 +13,14 @@ from vector_space_model import VectorSpaceModel
 from okapi_bm25 import OkapiBM25
 
 # Download NLTK data
-data_dir = Path.joinpath(Path(__file__).parent.parent.parent, "./nltk_data")
-nltk.data.path.append(data_dir)
-
+nltk.data.path.append(DATA_DIR)
 try:
     reuters.fileids()
 except LookupError:
-    nltk.download('reuters', download_dir=data_dir)
-    nltk.download('punkt', download_dir=data_dir)
-    nltk.download('stopwords', download_dir=data_dir)
-    nltk.download('punkt_tab', download_dir=data_dir)
+    nltk.download('reuters', download_dir=DATA_DIR)
+    nltk.download('punkt', download_dir=DATA_DIR)
+    nltk.download('stopwords', download_dir=DATA_DIR)
+    nltk.download('punkt_tab', download_dir=DATA_DIR)
 
 class SearchEngine:
     def __init__(self):

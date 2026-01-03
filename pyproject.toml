@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "search_engine"
+version = "0.0.1"
+description = "IR LabProject Reuters search engine"
+authors = [
+    {name = "Markantonatos Georgios", email = "ice22390138@uniwa.gr"},
+    {name = "Antivahis Antonios", email = "ice22390289@uniwa.gr"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "nltk"
+]
+
+[project.scripts]
+search-engine-cli = "search_engine.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
