@@ -252,7 +252,6 @@ class SearchEvaluator:
 
 
 def main():
-    """Main with terminal user interface"""
     engine = SearchEngine()
     engine.build_index()
 
@@ -261,8 +260,7 @@ def main():
         -- Options --
         1. Search
         2. Evaluate all methods
-        3. Exit
-        """))
+        3. Exit"""))
 
         choice = input(">> ").strip()
 
@@ -277,8 +275,7 @@ def main():
                 -- Select retrieval method --
                 1. Boolean
                 2. Vector Space Model (TF-IDF)
-                3. BM25
-                """))
+                3. BM25"""))
                 method_choice = input(">> ").strip()
 
                 method_map = {'1': 'boolean', '2': 'vsm', '3': 'bm25'}
@@ -290,8 +287,7 @@ def main():
                     -- Select boolean operator --
                     1. AND (all terms must match)
                     2. OR (any terms must match)
-                    3. NOT (exclude documents containing the given terms)
-                    """))
+                    3. NOT (exclude documents containing the given terms)"""))
                     op_choice = input(">> ").strip()
                     op_map = {'1': 'AND', '2': 'OR', '3': 'NOT'}
                     boolean_op = op_map.get(op_choice, 'AND')
@@ -315,7 +311,7 @@ def main():
                 evaluator.print_evaluation_results(results)
 
             case '3':
-                print("Exiting, bye...")
+                print("Exiting, bye!")
                 break
 
             case _:
