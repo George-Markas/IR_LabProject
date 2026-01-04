@@ -1,26 +1,15 @@
-import nltk
 from nltk.corpus import reuters
 from typing import List, Tuple, Set, Dict
 from collections import defaultdict
 from textwrap import dedent
 import numpy
 
-from search_engine.config import DATA_DIR
+from search_engine.downloader import download_datasets
 from search_engine.text_processor import TextProcessor
 from search_engine.inverted_index import InvertedIndex
 from search_engine.boolean_retrieval import BooleanRetrieval
 from search_engine.vector_space_model import VectorSpaceModel
 from search_engine.okapi_bm25 import OkapiBM25
-
-# Download NLTK data
-nltk.data.path.append(DATA_DIR)
-try:
-    reuters.fileids()
-except LookupError:
-    nltk.download('reuters', download_dir=DATA_DIR)
-    nltk.download('punkt', download_dir=DATA_DIR)
-    nltk.download('stopwords', download_dir=DATA_DIR)
-    nltk.download('punkt_tab', download_dir=DATA_DIR)
 
 class SearchEngine:
     def __init__(self):
@@ -252,6 +241,7 @@ class SearchEvaluator:
 
 
 def main():
+    download_datasets()
     engine = SearchEngine()
     engine.build_index()
 
