@@ -494,6 +494,7 @@ def main():
                 cisi_evaluator.print_evaluation_results(cisi_results, "CISI")
 
             case '3':
+                print("Exiting, bye...")
                 break
 
             case _:
