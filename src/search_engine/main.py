@@ -3,6 +3,7 @@ from typing import List, Tuple, Set, Dict
 from collections import defaultdict
 from textwrap import dedent
 import numpy
+import os
 
 from search_engine.downloader import download_datasets
 from search_engine.text_processor import TextProcessor
@@ -10,6 +11,7 @@ from search_engine.inverted_index import InvertedIndex
 from search_engine.boolean_retrieval import BooleanRetrieval
 from search_engine.vector_space_model import VectorSpaceModel
 from search_engine.okapi_bm25 import OkapiBM25
+
 
 class SearchEngine:
     def __init__(self):
@@ -21,7 +23,7 @@ class SearchEngine:
         self.raw_documents = {}
         self.processed_documents = {}
 
-    def build_index(self, sample_size: int = 1000):
+    def build_index_from_reuters(self, sample_size: int = 1000):
         """Build index from Reuters corpus"""
         print(f"Loading Reuters corpus with a sample size of {sample_size}...")
         file_ids = reuters.fileids()[:sample_size]
@@ -35,7 +37,6 @@ class SearchEngine:
             processed = self.processor.process(raw_text)
             self.processed_documents[file_id] = processed
 
-        print("Building inverted index...")
         self.inverted_index.build(self.processed_documents)
 
         # Initialize retrieval models
@@ -44,10 +45,75 @@ class SearchEngine:
         self.bm25 = OkapiBM25(self.inverted_index)
 
         print(dedent(f"""
-        Index built successfully!
+        Index built successfully from Reuters corpus.
         Total documents: {self.inverted_index.total_docs}
         Vocabulary size: {len(self.inverted_index.index)}
         Average document length: {self.inverted_index.avg_doc_length:.2f} terms"""))
+
+    def build_index_from_cisi(self, cisi_path: str):
+        """Build index from CISI"""
+        print(f"Loading CISI...")
+
+        # Parse CISI documents
+        docs = self.parse_cisi_documents(os.path.join(cisi_path, 'CISI.ALL'))
+
+        for doc_id, raw_text in docs.items():
+            self.raw_documents[doc_id] = raw_text
+            processed = self.processor.process(raw_text)
+            self.processed_documents[doc_id] = processed
+
+        self.inverted_index.build(self.processed_documents)
+
+        # Initialize retrieval models
+        self.boolean_retrieval = BooleanRetrieval(self.inverted_index)
+        self.vsm = VectorSpaceModel(self.inverted_index)
+        self.bm25 = OkapiBM25(self.inverted_index)
+
+        print(dedent(f"""
+        Index built successfully from CISI.
+        Total documents: {self.inverted_index.total_docs}
+        Vocabulary size: {len(self.inverted_index.index)}
+        Average document length: {self.inverted_index.avg_doc_length:.2f} terms
+        """))
+
+    @staticmethod
+    def parse_cisi_documents(filepath: str) -> Dict[str, str]:
+        """Parse CISI.ALL file and extract documents"""
+        documents = {}
+        current_doc_id = None
+        current_field = None
+        current_content = []
+
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                line = line.rstrip()
+
+                if line.startswith('.I'):
+                    # Save previous document
+                    if current_doc_id and current_content:
+                        documents[current_doc_id] = ' '.join(current_content)
+
+                    # Start new document
+                    current_doc_id = f"CISI_{line.split()[1]}"
+                    current_content = []
+                    current_field = None
+
+                elif line.startswith('.T') or line.startswith('.W') or line.startswith('.A'):
+                    # These are the main content fields (Title, Abstract/Words, Author)
+                    current_field = line[1]
+
+                elif line.startswith('.'):
+                    # Other fields we don't include in the document text
+                    current_field = None
+
+                elif current_field in ['T', 'W', 'A'] and line.strip():
+                    current_content.append(line.strip())
+
+            # Save last document
+            if current_doc_id and current_content:
+                documents[current_doc_id] = ' '.join(current_content)
+
+        return documents
 
     def search(self, query: str, method: str = 'bm25', top_n: int = 10,
                boolean_op: str = 'AND') -> List[Tuple[str, float]]:
@@ -116,7 +182,7 @@ class SearchEvaluator:
         self.search_engine = search_engine
 
     @staticmethod
-    def create_test_queries() -> List[Tuple[str, Set[str]]]:
+    def create_reuters_test_queries() -> List[Tuple[str, Set[str]]]:
         """
         Create test queries with relevance judgments.
 
@@ -138,6 +204,77 @@ class SearchEvaluator:
                 test_queries.append((category, relevant_docs))
 
         return test_queries
+
+    def create_cisi_test_queries(self, cisi_path: str) -> List[Tuple[str, Set[str]]]:
+        """
+        Create test queries with relevance judgments for CISI.
+
+        Returns:
+            List of (query, relevant_doc_ids) tuples.
+        """
+        queries = self.parse_cisi_queries(os.path.join(cisi_path, 'CISI.QRY'))
+        relevance = self.parse_cisi_relevance(os.path.join(cisi_path, 'CISI.REL'))
+
+        test_queries = []
+        for query_id, query_text in queries.items():
+            if query_id in relevance:
+                relevant_docs = {f"CISI_{doc_id}" for doc_id in relevance[query_id]}
+                test_queries.append((query_text, relevant_docs))
+
+        return test_queries[:5]
+
+    @staticmethod
+    def parse_cisi_queries(filepath: str) -> Dict[str, str]:
+        """Parse CISI.QRY file and extract queries"""
+        queries = {}
+        current_query_id = None
+        current_field = None
+        current_content = []
+
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                line = line.rstrip()
+
+                if line.startswith('.I'):
+                    # Save previous query
+                    if current_query_id and current_content:
+                        queries[current_query_id] = ' '.join(current_content)
+
+                    # Start new query
+                    current_query_id = line.split()[1]
+                    current_content = []
+                    current_field = None
+
+                elif line.startswith('.W'):
+                    # Query text field
+                    current_field = 'W'
+
+                elif line.startswith('.'):
+                    current_field = None
+
+                elif current_field == 'W' and line.strip():
+                    current_content.append(line.strip())
+
+            # Save last query
+            if current_query_id and current_content:
+                queries[current_query_id] = ' '.join(current_content)
+
+        return queries
+
+    @staticmethod
+    def parse_cisi_relevance(filepath: str) -> Dict[str, Set[str]]:
+        """Parse CISI.REL file and extract relevance judgments"""
+        relevance = defaultdict(set)
+
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    query_id = parts[0]
+                    doc_id = parts[1]
+                    relevance[query_id].add(doc_id)
+
+        return relevance
 
     def evaluate(self, query: str, relevant_docs: Set[str], method: str,
                  top_n: int = 10) -> Dict[str, float]:
@@ -178,7 +315,7 @@ class SearchEvaluator:
             'average_precision': ap
         }
 
-    def evaluate_all_methods(self, top_n: int = 10) -> Dict[str, Dict[str, float]]:
+    def evaluate_all_methods_reuters(self, top_n: int = 10) -> Dict[str, Dict[str, float]]:
         """
         Evaluate all retrieval methods.
 
@@ -186,15 +323,52 @@ class SearchEvaluator:
             Dictionary with average metrics for each method.
         """
 
-        print("Creating test queries...")
-        test_queries = self.create_test_queries()
-        print(f"Evaluating on {len(test_queries)} test queries...\n")
+        test_queries = self.create_reuters_test_queries()
 
         methods = ['boolean', 'vsm', 'bm25']
         results = {method: defaultdict(list) for method in methods}
 
         for query, relevant_docs in test_queries:
-            print(f"Evaluating query: '{query}'")
+            print(f"\x1B[3mEvaluating query: '{query}'\x1B[0m")
+
+            for method in methods:
+                metrics = self.evaluate(query, relevant_docs, method, top_n)
+
+                for metric_name, value in metrics.items():
+                    results[method][metric_name].append(value)
+
+                print(dedent(f"""
+                {method.upper()}: P={metrics['precision']:.3f},
+                R={metrics['recall']:.3f}, F1={metrics['f1']:.3f},
+                AP={metrics['average_precision']:.3f}
+                """))
+            print()
+
+        # Calculate averages
+        avg_results = {}
+        for method in methods:
+            avg_results[method] = {
+                metric: numpy.mean(values)
+                for metric, values in results[method].items()
+            }
+
+        return avg_results
+
+    def evaluate_all_methods_cisi(self, cisi_path: str, top_n: int = 10) -> Dict[str, Dict[str, float]]:
+        """
+        Evaluate all retrieval methods on CISI dataset.
+
+        Returns:
+            Dictionary with average metrics for each method.
+        """
+
+        test_queries = self.create_cisi_test_queries(cisi_path)
+
+        methods = ['boolean', 'vsm', 'bm25']
+        results = {method: defaultdict(list) for method in methods}
+
+        for query, relevant_docs in test_queries:
+            print(f"\x1B[3mEvaluating query: '{query[:50]}...'\x1B[0m")
 
             for method in methods:
                 metrics = self.evaluate(query, relevant_docs, method, top_n)
@@ -220,11 +394,11 @@ class SearchEvaluator:
         return avg_results
 
     @staticmethod
-    def print_evaluation_results(results: Dict[str, Dict[str, float]]):
-        """Print evaluation results in a formatted table"""
+    def print_evaluation_results(results: Dict[str, Dict[str, float]], dataset_name: str):
+        """Print evaluation results in a formatted table with dataset name"""
         print(dedent(f"""
         {'=' * 80}
-        Evaluation Results - Average Metrics
+        Evaluation Results - {dataset_name}
         {'=' * 80}
         {'Method':<15} {'Precision':<12} {'Recall':<12} {'F1-Score':<12} {'Avg. Precision':<16}
         {'-' * 80}
@@ -237,13 +411,13 @@ class SearchEvaluator:
                   f"{metrics['f1']:<12.4f} "
                   f"{metrics['average_precision']:<15.4f}")
 
-        print(f"{'='*80}\n")
+        print(f"{'=' * 80}\n")
 
 
 def main():
-    download_datasets()
+    cisi_path = download_datasets()
     engine = SearchEngine()
-    engine.build_index()
+    engine.build_index_from_reuters()
 
     while True:
         print(dedent("""
@@ -295,17 +469,36 @@ def main():
                 engine.display_results(results, query, method)
 
             case '2':
-                # Evaluate all methods
+                # Evaluate all methods on both datasets
+                print(dedent(f"""
+                {'=' * 80}
+                Evaluating Reuters dataset...
+                {'=' * 80}
+                """))
+
                 evaluator = SearchEvaluator(engine)
-                results = evaluator.evaluate_all_methods(top_n=10)
-                evaluator.print_evaluation_results(results)
+                reuters_results = evaluator.evaluate_all_methods_reuters(top_n=10)
+
+                print(dedent(f"""
+                {'=' * 80}
+                Evaluating CISI dataset...
+                {'=' * 80}
+                """))
+
+                cisi_engine = SearchEngine()
+                cisi_engine.build_index_from_cisi(cisi_path)
+                cisi_evaluator = SearchEvaluator(cisi_engine)
+                cisi_results = cisi_evaluator.evaluate_all_methods_cisi(cisi_path, top_n=10)
+
+                evaluator.print_evaluation_results(reuters_results, "Reuters")
+                cisi_evaluator.print_evaluation_results(cisi_results, "CISI")
 
             case '3':
-                print("Exiting, bye!")
                 break
 
             case _:
                 print("Invalid choice, please try again")
+
 
 if __name__ == "__main__":
     main()
