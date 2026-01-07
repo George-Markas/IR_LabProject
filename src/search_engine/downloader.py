@@ -4,8 +4,7 @@ from nltk.corpus import reuters
 
 def download_datasets():
     # Download CISI
-    path = kagglehub.dataset_download("dmaso01dsta/cisi-a-dataset-for-information-retrieval")
-    print(f"Downloaded CISI dataset to {path}\n")
+    kagglehub.dataset_download("dmaso01dsta/cisi-a-dataset-for-information-retrieval")
 
     # Download Reuters
     try:
