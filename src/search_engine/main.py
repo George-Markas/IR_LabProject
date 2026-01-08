@@ -332,16 +332,17 @@ class SearchEvaluator:
             print(f"\x1B[3mEvaluating query: '{query}'\x1B[0m")
 
             for method in methods:
-                metrics = self.evaluate(query, relevant_docs, method, top_n)
+                if method != 'boolean':
+                    metrics = self.evaluate(query, relevant_docs, method, top_n)
 
-                for metric_name, value in metrics.items():
-                    results[method][metric_name].append(value)
+                    for metric_name, value in metrics.items():
+                        results[method][metric_name].append(value)
 
-                print(dedent(f"""
-                {method.upper()}: P={metrics['precision']:.3f},
-                R={metrics['recall']:.3f}, F1={metrics['f1']:.3f},
-                AP={metrics['average_precision']:.3f}
-                """))
+                    print(dedent(f"""
+                    {method.upper()}: P={metrics['precision']:.3f},
+                    R={metrics['recall']:.3f}, F1={metrics['f1']:.3f},
+                    AP={metrics['average_precision']:.3f}
+                    """))
             print()
 
         # Calculate averages
@@ -371,16 +372,17 @@ class SearchEvaluator:
             print(f"\x1B[3mEvaluating query: '{query[:50]}...'\x1B[0m")
 
             for method in methods:
-                metrics = self.evaluate(query, relevant_docs, method, top_n)
+                if method != 'boolean':
+                    metrics = self.evaluate(query, relevant_docs, method, top_n)
 
-                for metric_name, value in metrics.items():
-                    results[method][metric_name].append(value)
+                    for metric_name, value in metrics.items():
+                        results[method][metric_name].append(value)
 
-                print(dedent(f"""
-                {method.upper()}: P={metrics['precision']:.3f},
-                R={metrics['recall']:.3f}, F1={metrics['f1']:.3f},
-                AP={metrics['average_precision']:.3f}
-                """))
+                    print(dedent(f"""
+                    {method.upper()}: P={metrics['precision']:.3f},
+                    R={metrics['recall']:.3f}, F1={metrics['f1']:.3f},
+                    AP={metrics['average_precision']:.3f}
+                    """))
             print()
 
         # Calculate averages
@@ -401,16 +403,22 @@ class SearchEvaluator:
         Evaluation Results - {dataset_name}
         {'=' * 80}
         {'Method':<15} {'Precision':<12} {'Recall':<12} {'F1-Score':<12} {'Avg. Precision':<16}
-        {'-' * 80}
-        """))
+        {'-' * 80}"""))
 
         for method, metrics in results.items():
-            print(f"{method.upper():<15} "
-                  f"{metrics['precision']:<12.4f} "
-                  f"{metrics['recall']:<12.4f} "
-                  f"{metrics['f1']:<12.4f} "
-                  f"{metrics['average_precision']:<15.4f}")
-
+            # Rankings aren't applicable to boolean retrieval; the documents either exist or they do not
+            if method == 'boolean':
+                print(f"{method.upper():<15} "
+                      f"{'N/A':<12} "
+                      f"{'N/A':<12} "
+                      f"{'N/A':<12} "
+                      f"{'N/A':<15}")
+            else:
+                print(f"{method.upper():<15} "
+                    f"{metrics['precision']:<12.4f} "
+                    f"{metrics['recall']:<12.4f} "
+                    f"{metrics['f1']:<12.4f} "
+                    f"{metrics['average_precision']:<15.4f}")
         print(f"{'=' * 80}\n")
 
 
@@ -476,8 +484,8 @@ def main():
                 {'=' * 80}
                 """))
 
-                evaluator = SearchEvaluator(engine)
-                reuters_results = evaluator.evaluate_all_methods_reuters(top_n=10)
+                reuters_evaluator = SearchEvaluator(engine)
+                reuters_results = reuters_evaluator.evaluate_all_methods_reuters(top_n=10)
 
                 print(dedent(f"""
                 {'=' * 80}
@@ -490,7 +498,7 @@ def main():
                 cisi_evaluator = SearchEvaluator(cisi_engine)
                 cisi_results = cisi_evaluator.evaluate_all_methods_cisi(cisi_path, top_n=10)
 
-                evaluator.print_evaluation_results(reuters_results, "Reuters")
+                reuters_evaluator.print_evaluation_results(reuters_results, "Reuters")
                 cisi_evaluator.print_evaluation_results(cisi_results, "CISI")
 
             case '3':
