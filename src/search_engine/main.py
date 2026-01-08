@@ -502,7 +502,7 @@ def main():
                 cisi_evaluator.print_evaluation_results(cisi_results, "CISI")
 
             case '3':
-                print("Exiting, bye...")
+                print("\x1B[3mExiting, bye...\x1B[0m")
                 break
 
             case _:
