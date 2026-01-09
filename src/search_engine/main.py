@@ -332,6 +332,7 @@ class SearchEvaluator:
             print(f"\x1B[3mEvaluating query: '{query}'\x1B[0m")
 
             for method in methods:
+                # Skip evaluation for boolean as it is non-applicable
                 if method != 'boolean':
                     metrics = self.evaluate(query, relevant_docs, method, top_n)
 
@@ -372,6 +373,7 @@ class SearchEvaluator:
             print(f"\x1B[3mEvaluating query: '{query[:50]}...'\x1B[0m")
 
             for method in methods:
+                # Skip evaluation for boolean as it is non-applicable
                 if method != 'boolean':
                     metrics = self.evaluate(query, relevant_docs, method, top_n)
 
