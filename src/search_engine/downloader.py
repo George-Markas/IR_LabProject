@@ -2,6 +2,7 @@ import nltk
 import kagglehub
 from nltk.corpus import reuters
 
+
 def download_datasets() -> str:
     # Download Reuters
     try:
