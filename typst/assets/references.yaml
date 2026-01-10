@@ -1,0 +1,27 @@
+reuters-wiki:
+  type: web
+  title: "Reuters"
+  author: "Wikipedia contributors"
+  url: "https://en.wikipedia.org/wiki/Reuters"
+  organization: "Wikipedia, The Free Encyclopedia"
+
+porter-stemmer:
+  type: web
+  title: "Porter Stemmer Technique in Natural Language Processing"
+  author: "GeeksforGeeks"
+  url: "https://www.geeksforgeeks.org/nlp/porter-stemmer-technique-in-natural-language-processing/"
+  organization: "GeeksforGeeks"
+
+hash-table-wiki:
+  type: web
+  title: "Hash table"
+  author: "Wikipedia contributors"
+  url: "https://en.wikipedia.org/wiki/Hash_table"
+  organization: "Wikipedia, The Free Encyclopedia"
+
+harmonic-mean-wiki:
+  type: web
+  title: "Harmonic mean"
+  author: "Wikipedia contributors"
+  url: "https://en.wikipedia.org/wiki/Harmonic_mean"
+  organization: "Wikipedia, The Free Encyclopedia"
