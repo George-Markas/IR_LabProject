@@ -58,7 +58,7 @@
 = Συλλογή Δεδομένων
 #v(1em)
 
-Για τη μηχανή αναζήτησης χρησιμοποιείται Reuters-21578 Corpus dataset. Το Reuters-21578
+Για τη μηχανή αναζήτησης χρησιμοποιείται το Reuters-21578 Corpus dataset. Το Reuters-21578
 Corpus απαρτίζεται από έγγραφα που δημοσιεύτηκαν από το ειδησεογραφικό πρακτορείο
 #text(fill: blue, link("https://en.wikipedia.org/wiki/Reuters")[Reuters]) το 1987.
 To dataset συντάχθηκε από τον David D. Lewis, και έγινε διαθέσιμο για ερευνητικούς σκοπούς
