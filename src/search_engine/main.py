@@ -417,10 +417,10 @@ class SearchEvaluator:
                       f"{'N/A':<15}")
             else:
                 print(f"{method.upper():<15} "
-                    f"{metrics['precision']:<12.4f} "
-                    f"{metrics['recall']:<12.4f} "
-                    f"{metrics['f1']:<12.4f} "
-                    f"{metrics['average_precision']:<15.4f}")
+                      f"{metrics['precision']:<12.4f} "
+                      f"{metrics['recall']:<12.4f} "
+                      f"{metrics['f1']:<12.4f} "
+                      f"{metrics['average_precision']:<15.4f}")
         print(f"{'=' * 80}\n")
 
 
