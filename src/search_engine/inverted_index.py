@@ -11,7 +11,7 @@ class InvertedIndex:
         self.total_docs = 0
         self.avg_doc_length = 0
 
-    def build(self, documents: Dict[str, List[str]]) -> None:
+    def build(self, documents: Dict[str, List[str]]):
         """Build inverted index from processed documents"""
         self.total_docs = len(documents)
         total_length = 0

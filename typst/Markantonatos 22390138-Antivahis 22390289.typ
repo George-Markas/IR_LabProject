@@ -6,6 +6,14 @@
     it,
 )
 
+#show raw.where(block: true): it => box(
+    fill: luma(230),
+    inset: (x: 3pt, y: 0pt),
+    outset: (y: 3pt),
+    radius: 3pt,
+    it,
+)
+
 #show link: underline
 
 #let title-page(title: [], authors: (), fill: yellow, body) = {
@@ -38,7 +46,7 @@
         spacing: 0.65em,
         justify: true,
     )
-    set page(fill: none, margin: auto, numbering: "1")
+    set page(fill: none, margin: auto, paper: "a4", numbering: "1")
     set heading(numbering: "1.")
     set par(justify: true, first-line-indent: 1em)
     align(horizon, outline(indent: auto, title: "Περιεχόμενα"))
@@ -145,3 +153,34 @@ Reuters-21578 Corpus "χειροκίνητα", οπότε αντί να υλοπ
 
 = Indexing
 #v(1em)
+Για το ευρετήριο χρησιμοποιούμε τη δομή δεδομένων inverted index. Εντός της δομής αυτής,
+το ευρετήριο οργανώνεται βάσει όρων, και κάθε όρος "δείχνει" σε μία λίστα εγγράφων
+που περιέχουν τον όρο αυτό. Ουσιαστικά, το inverted index μοιάζει με
+#text(fill: blue, link("https://en.wikipedia.org/wiki/Hash_table")[hash table]) από την άποψη
+πως έχουμε συνδυασμό "κλειδιού - στοιχείου", όπου το κλειδί είναι ο όρος και το στοιχείο είναι
+λίστα από έγγραφα.
+
+Η υλοποίηση inverted index για τη μηχανή αναζήτησης βασίζεται στο ```py dict()``` container
+της python, που αποθηκεύει πληροφορία με το προαναφερθέν μοτίβο "κλειδιού  - στοιχείου".
+Παράδειγμα dictionary:
+#v(0.5em)
+#align(center)[
+    ```py
+    car_dict = {
+        "model": "R8",
+        "make": "Audi",
+        "year": 2006
+    }
+    ```
+]
+#v(0.5em)
+
+Κάθε έγγραφο είναι ένα dictionary που περιέχει το _id_ του και του και μία λίστα από όρους.
+Συγκεκριμένα:
+#v(0.5em)
+#align(center)[
+    ```py
+   documents: Dict[str, List[str]]
+    ```
+]
+#v(0.5em)
