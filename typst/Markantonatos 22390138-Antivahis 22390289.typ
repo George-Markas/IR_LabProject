@@ -9,7 +9,7 @@
 #show raw.where(block: true): it => box(
     fill: luma(230),
     inset: (x: 3pt, y: 0pt),
-    outset: (y: 3pt),
+    outset: (y: 5pt),
     radius: 3pt,
     it,
 )
@@ -18,7 +18,7 @@
 
 #let title-page(title: [], authors: (), fill: yellow, body) = {
     set page(fill: rgb("#FFD700"), margin: (top: 1.5in, rest: 2in), paper: "a4", numbering: none)
-    set text(font: "Source Sans 3", size: 14pt)
+    set text(font: "Source Sans 3", size: 14pt, spacing: 100%)
 
     line(start: (0%, 0%), end: (8.5in, 0%), stroke: (thickness: 2pt))
     align(horizon + left)[
@@ -43,12 +43,10 @@
     pagebreak()
     set par(
         first-line-indent: 1em,
-        spacing: 0.65em,
-        justify: true,
+        justify: false,
     )
     set page(fill: none, margin: auto, paper: "a4", numbering: "1")
     set heading(numbering: "1.")
-    set par(justify: true, first-line-indent: 1em)
     align(horizon, outline(indent: auto, title: "Περιεχόμενα"))
     pagebreak()
     body
@@ -173,14 +171,98 @@ Reuters-21578 Corpus "χειροκίνητα", οπότε αντί να υλοπ
     }
     ```
 ]
-#v(0.5em)
+#v(1em)
 
-Κάθε έγγραφο είναι ένα dictionary που περιέχει το _id_ του και του και μία λίστα από όρους.
-Συγκεκριμένα:
-#v(0.5em)
+Κάθε έγγραφο είναι ένα dictionary που περιέχει ένα _id_ και μία λίστα από όρους.
+Συγκεκριμένα: ```py documents: Dict[str, List[str]]```
+
+Έτσι, έχουμε την ακόλουθη επανάληψη για να επεξεργαζόμαστε τα στοιχεία κάθε dictionary:
+#v(0.3em)
 #align(center)[
     ```py
-   documents: Dict[str, List[str]]
+    for doc_id, terms in documents.items():
     ```
 ]
-#v(0.5em)
+#v(1em)
+
+- Καταγράφουμε πόσους όρους έχει το έγγραφο (και κατ' επέκταση τους συνολικούς όρους του dataset):
+#v(0.3em)
+#align(center)[
+    ```py
+    doc_length = len(terms)
+    self.doc_lengths[doc_id] = doc_length
+    total_length += doc_length
+    ```
+]
+#v(1em)
+
+- Καταγράφουμε τη συχνότητα των όρων:
+#v(0.3em)
+#align(center)[
+    ```py
+    term_counts = Counter(terms)
+    self.doc_terms[doc_id] = term_counts
+    ```
+]
+#v(1em)
+
+- Tέλος, κατασκευάζουμε το ευρετήριο, καταχωρούμε δηλαδή σε λίστα τη θέση του
+    εκάστοτε όρου και το αντίστοιχο _id_ του εγγράφου:
+
+#v(0.3em)
+#align(center)[
+    ```py
+    for pos, term in enumerate(terms):
+        self.index[term].append((doc_id, pos))
+    ```
+]
+#v(1em)
+
+Η μέθοδος ```py enumerate()``` αναθέτει δείκτες στα στοιχεία της δοθείσας λίστας
+για εύκολη προσπέλαση. Παράδειγμα:
+#v(0.3em)
+#align(center)[
+    ```py
+    s = ["foo", "bar", "baz"]
+    print(list(enumerate(s)))
+    ```
+    #v(0.8em)
+    _Output:_
+    ```py [(0, 'foo'), (1, 'bar'), (2, 'baz')]```
+]
+#v(1em)
+#pagebreak()
+
+Το inverted index class έχει getter methods για να επιστρέφουμε τα εξής:
+
+- Έγγραφα που περιέχουν συγκεκριμένο όρο
+#v(0.3em)
+#align(center)[
+    ```py
+    def get_docs_containing(self, term: str) -> Set[str]:
+        return set(doc_id for doc_id, _ in self.index.get(term, []))
+    ```
+]
+#v(1em)
+
+- Τη συχνότητα ενός όρου
+#v(0.3em)
+#align(center)[
+    ```py
+    def get_term_frequency(self, term: str, doc_id: str) -> int:
+        return self.doc_terms[doc_id].get(term, 0)
+    ```
+]
+#v(1em)
+
+- Τη συχνότητα εγγράφων για έναν όρο, δηλαδή σε πόσα έγγραφα 
+  εμπεριέχεται ο όρος αυτός
+#v(0.3em)
+#align(center)[
+    #set text(size: 13pt)
+    ```py
+    def get_doc_frequency(self, term: str) -> int:
+        return len(set(doc_id for doc_id, _ in self.index.get(term, [])))
+    ```
+]
+#v(1em)
