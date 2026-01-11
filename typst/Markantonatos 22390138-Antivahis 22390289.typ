@@ -15,6 +15,7 @@
 )
 
 #show link: underline
+#show figure.caption: emph
 
 #let title-page(title: [], authors: (), fill: yellow, body) = {
   set page(fill: rgb("#FFD700"), margin: (top: 1.5in, rest: 2in), paper: "a4", numbering: none)
@@ -348,7 +349,7 @@ To Ιnverse Document Frequency είναι σημασία ενός όρου σε 
 ]
 
 Για την υλοποίηση του αλγορίθμου στη μηχανή αναζήτησης, εφαρμόστηκαν οι παραπάνω τύποι
-με τη βοήθεια της βιβλιοθήκης math:
+#footnote[ομοίως και για το Vector Space Model] με τη βοήθεια της βιβλιοθήκης math:
 
 - IDF:
 #align(center)[
@@ -465,5 +466,47 @@ F1-Score είναι ο αρμονικός μέσος @harmonic-mean-wiki Precisi
 μεγαλύτερα καθώς τα παίρνουμε έτοιμα από το _CISI.QRY_ αρχείο του dataset, ενώ για το
 Reuters-21578 Corpus χρησιμοποιούμε ενδεικτικά κάποιες κατηγορίες όπως
 `"acq"`, `"crude"`, `"money-fx"` etc.
+
+= Showcase προγράμματος
+
+#figure(
+  image("assets/sc1.png", width: 85%),
+  caption: [
+    CLI διεπαφή
+  ]
+)
+#v(1em)
+
+#figure(
+  image("assets/sc2.png", width: 85%),
+  caption: [
+    Αποτελέσματα query "gas prices" με Okapi BM25
+  ]
+)
+#v(1em)
+
+#figure(
+  image("assets/sc3.png", width: 85%),
+  caption: [
+    Αποτελέσματα query "S&P 500" με Vector Space Model
+  ]
+)
+#v(1em)
+
+#figure(
+  image("assets/sc4.png", width: 85%),
+  caption: [
+    Αποτελέσματα query "Dow Jones" με Boolean Retrieval (OR)
+  ]
+)
+#v(1em)
+
+#figure(
+  image("assets/sc5.png", width: 85%),
+  caption: [
+    Αποτελέσματα αξιολόγησης
+  ]
+)
+#v(1em)
 
 #bibliography("assets/references.yaml", title: "Αναφορές")
